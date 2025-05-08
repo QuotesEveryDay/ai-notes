@@ -8,7 +8,8 @@ export default function Home() {
   const [copyStatus, setCopyStatus] = useState<string>('Copy Notes');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [processedText, setProcessedText] = useState<string>("");
+  // ESLint disable for unused variable as it's primarily for internal state tracking
+  const [processedText, setProcessedText] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [generatedNotes, setGeneratedNotes] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export default function Home() {
     default: "Please process the following text and generate relevant notes or summaries in markdown:",
     summary: "Summarize the following text concisely in markdown:",
     flashcards: "Generate flashcard questions and answers from the following text in markdown format (Q: A:):",
+    // Added new prompts
     keywords: "Extract the most important keywords and concepts from the following text, presented as a comma-separated list:",
     summary_bullet: "Summarize the following text using bullet points, highlighting the key information:",
     detailed_explanation: "Provide a detailed explanation of the key topics discussed in the following text:",
@@ -207,9 +209,11 @@ export default function Home() {
       setGeneratedNotes(notesData.notes);
       console.log("Notes generated successfully.");
 
-    } catch (err: any) {
+    } catch (err: unknown) { // Use unknown instead of any
       console.error("Processing error:", err);
-      setError(err.message || "An unexpected error occurred.");
+      // Use type assertion for properties common in errors
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -455,23 +459,23 @@ export default function Home() {
             </div>
             <ReactMarkdown
               components={{
-                p: ({ node, ...props }) => <p className="text-slate-200 mb-4 leading-relaxed" {...props} />,
-                h1: ({ node, ...props }) => <h1 className="text-4xl font-bold text-blue-400 mb-6" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-3xl font-semibold text-blue-300 mb-4" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-2xl font-medium text-blue-200 mb-3" {...props} />,
-                h4: ({ node, ...props }) => <h4 className="text-xl font-medium text-blue-100 mb-2" {...props} />,
-                h5: ({ node, ...props }) => <h5 className="text-lg font-medium text-blue-100 mb-2" {...props} />,
-                h6: ({ node, ...props }) => <h6 className="text-base font-medium text-blue-100 mb-2" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc list-inside text-slate-200 mb-4 pl-4" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal list-inside text-slate-200 mb-4 pl-4" {...props} />,
-                li: ({ node, ...props }) => <li className="text-slate-200" {...props} />,
-                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 pl-4 italic text-slate-300 mb-4 bg-slate-800 p-4 rounded" {...props} />,
-                code: ({ node, ...props }) => <code className="bg-slate-800 text-blue-400 px-2 py-1 rounded" {...props} />,
-                pre: ({ node, ...props }) => <pre className="bg-slate-800 text-blue-400 p-4 rounded mb-4 overflow-x-auto" {...props} />,
-                a: ({ node, ...props }) => <a className="text-blue-400 hover:underline" {...props} />,
-                table: ({ node, ...props }) => <table className="min-w-full divide-y divide-slate-700 mb-4" {...props} />,
-                th: ({ node, ...props }) => <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider" {...props} />,
-                td: ({ node, ...props }) => <td className="px-6 py-4 whitespace-nowrap text-slate-200" {...props} />,
+                p: (props) => <p className="text-slate-200 mb-4 leading-relaxed" {...props} />,
+                h1: (props) => <h1 className="text-4xl font-bold text-blue-400 mb-6" {...props} />,
+                h2: (props) => <h2 className="text-3xl font-semibold text-blue-300 mb-4" {...props} />,
+                h3: (props) => <h3 className="text-2xl font-medium text-blue-200 mb-3" {...props} />,
+                h4: (props) => <h4 className="text-xl font-medium text-blue-100 mb-2" {...props} />,
+                h5: (props) => <h5 className="text-lg font-medium text-blue-100 mb-2" {...props} />,
+                h6: (props) => <h6 className="text-base font-medium text-blue-100 mb-2" {...props} />,
+                ul: (props) => <ul className="list-disc list-inside text-slate-200 mb-4 pl-4" {...props} />,
+                ol: (props) => <ol className="list-decimal list-inside text-slate-200 mb-4 pl-4" {...props} />,
+                li: (props) => <li className="text-slate-200" {...props} />,
+                blockquote: (props) => <blockquote className="border-l-4 border-blue-500 pl-4 italic text-slate-300 mb-4 bg-slate-800 p-4 rounded" {...props} />,
+                code: (props) => <code className="bg-slate-800 text-blue-400 px-2 py-1 rounded" {...props} />,
+                pre: (props) => <pre className="bg-slate-800 text-blue-400 p-4 rounded mb-4 overflow-x-auto" {...props} />,
+                a: (props) => <a className="text-blue-400 hover:underline" {...props} />,
+                table: (props) => <table className="min-w-full divide-y divide-slate-700 mb-4" {...props} />,
+                th: (props) => <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider" {...props} />,
+                td: (props) => <td className="px-6 py-4 whitespace-nowrap text-slate-200" {...props} />,
               }}
             >
               {generatedNotes}
@@ -489,7 +493,7 @@ export default function Home() {
       setTimeout(() => {
         setCopyStatus('Copy Notes');
       }, 2000); // Reset text after 2 seconds
-    } catch (err) {
+    } catch (err: unknown) { // Use unknown instead of any
       console.error('Failed to copy notes:', err);
       setCopyStatus('Failed to copy');
        setTimeout(() => {
