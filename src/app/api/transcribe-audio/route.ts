@@ -31,16 +31,20 @@ export async function POST(request: NextRequest) {
         model: "whisper-large-v3",
       });
       return NextResponse.json({ transcript: transcription.text });
-    } catch (groqError) {
+    } catch (groqError: unknown) { // Use unknown instead of any
         console.error('Groq API Error:', groqError);
         const errorMessage = groqError instanceof Error ? groqError.message : 'Groq API request failed';
         // Attempt to get status code from Groq error if available, otherwise default to 500
-        const errorStatus = (groqError as any)?.status || 500;
+        // Use type assertion for properties common in API errors
+        const errorStatus = (groqError as { status?: number })?.status || 500;
         return NextResponse.json({ error: 'Failed to transcribe audio via Groq API', details: errorMessage }, { status: errorStatus });
     }
 
-  } catch (error) {
+  } catch (error: unknown) { // Use unknown instead of any
     console.error('Error processing request:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+     // Use type assertion for properties common in errors
+    const errorStatus = (error as { status?: number })?.status || 500;
+    return NextResponse.json({ error: errorMessage }, { status: errorStatus });
   }
 }
