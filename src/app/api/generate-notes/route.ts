@@ -31,9 +31,10 @@ export async function POST(request: NextRequest) {
 
     if (!chatResponse.choices || chatResponse.choices.length === 0) {
       // Improved error handling for no choices
-      const errorDetails = (chatResponse as any).error || 'No choices returned from Mistral API';
-       // Attempt to get status code from Mistral response if available, otherwise default to 500
-      const errorStatus = (chatResponse as any).status || 500;
+      // Attempt to get status code from Mistral response if available, otherwise default to 500
+      // Using a type assertion here for error handling properties common in API responses
+      const errorDetails = (chatResponse as { error?: string }).error || 'No choices returned from Mistral API';
+      const errorStatus = (chatResponse as { status?: number }).status || 500;
       throw new Error(`Mistral API Error: ${errorDetails}, Status: ${errorStatus}`);
     }
 
@@ -43,9 +44,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error: unknown) {
     console.error('Error processing request:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
      // Attempt to extract status from the error object if it exists
-    const errorStatus = (error as any)?.status || 500;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    // Using a type assertion for error handling properties common in API responses
+    const errorStatus = (error as { status?: number })?.status || 500;
     return NextResponse.json({ error: 'Internal server error', details: errorMessage }, { status: errorStatus });
   }
 }
