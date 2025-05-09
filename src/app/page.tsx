@@ -8,7 +8,7 @@ export default function Home() {
   const [copyStatus, setCopyStatus] = useState<string>('Copy Notes');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [processedText, setProcessedText] = useState<string>("");
+  const [processedText, setProcessedText] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [generatedNotes, setGeneratedNotes] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
