@@ -20,14 +20,10 @@ export async function POST(request: NextRequest) {
 
     const groq = new Groq({ apiKey: groqApiKey });
 
-    // Convert the File blob to a Buffer
-    const audioBuffer = Buffer.from(await file.arrayBuffer());
-
+    // Removed unnecessary Buffer conversion. Pass the file object directly.
     try {
-      const audioFile = new File([audioBuffer], file.name, { type: file.type });
-
       const transcription = await groq.audio.transcriptions.create({
-        file: audioFile, // Pass the File object
+        file: file, // Pass the original File object
         model: "whisper-large-v3",
       });
       return NextResponse.json({ transcript: transcription.text });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent, useEffect } from "react"; // Import useEffect
+import { useState, ChangeEvent, useEffect } from "react";
 import ReactMarkdown from 'react-markdown';
 
 export default function Home() {
@@ -8,8 +8,7 @@ export default function Home() {
   const [copyStatus, setCopyStatus] = useState<string>('Copy Notes');
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  // ESLint disable for unused variable as it's primarily for internal state tracking
-  const [processedText, setProcessedText] = useState<string>(""); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [processedText, setProcessedText] = useState<string>("");
   const [generatedNotes, setGeneratedNotes] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +30,11 @@ export default function Home() {
     detailed_explanation: "Provide a detailed explanation of the key topics discussed in the following text:",
   };
 
+  // Define max file size (19MB)
+  const MAX_FILE_SIZE_MB = 19;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+
   // Load API keys from localStorage on component mount
   useEffect(() => {
     const savedGroqKey = localStorage.getItem('groqApiKey');
@@ -47,6 +51,13 @@ export default function Home() {
   const handleAudioFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setError(`Audio file size exceeds the ${MAX_FILE_SIZE_MB}MB limit.`);
+        event.target.value = ""; // Clear the file input
+        setAudioFile(null);
+        return;
+      }
       setAudioFile(file);
       setTextInput(""); // Clear other inputs
       setPdfFile(null);
@@ -54,12 +65,31 @@ export default function Home() {
       setGeneratedNotes("");
       setError(null);
       setActiveInput('audio');
+    } else if (event.target.files?.length === 0) {
+       // Handle case where user cancels file selection
+       setAudioFile(null);
+       setError(null);
     }
   };
 
   const handlePdfFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === "application/pdf") {
+    if (file) {
+       // Check file type first
+       if (file.type !== "application/pdf") {
+           setError("Please select a valid PDF file.");
+           event.target.value = ""; // Reset file input
+           setPdfFile(null);
+           return;
+       }
+      // Check file size
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setError(`PDF file size exceeds the ${MAX_FILE_SIZE_MB}MB limit.`);
+        event.target.value = ""; // Clear the file input
+        setPdfFile(null);
+        return;
+      }
+
       setPdfFile(file);
       setTextInput(""); // Clear other inputs
       setAudioFile(null);
@@ -67,9 +97,10 @@ export default function Home() {
       setGeneratedNotes("");
       setError(null);
       setActiveInput('pdf');
-    } else if (file) {
-        setError("Please select a valid PDF file.");
-        event.target.value = ""; // Reset file input
+    } else if (event.target.files?.length === 0) {
+       // Handle case where user cancels file selection
+       setPdfFile(null);
+       setError(null);
     }
   };
 
